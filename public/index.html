@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="WordGuess - A fun multiplayer online word guessing game. Play with friends and compete to guess the hidden word!">
+  <title>WordGuess - Multiplayer Word Guessing Game</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- ═══════════ FLOATING WORD BACKGROUND ═══════════ -->
+  <div id="wordBackground" class="word-background"></div>
+
+  <!-- ═══════════ HOME SCREEN ═══════════ -->
+  <div id="homeScreen" class="screen active">
+    <div class="home-container">
+      <h1 class="game-title">
+        <span class="title-word">W</span><span class="title-word">O</span><span class="title-word">R</span><span class="title-word">D</span><span class="title-letter-space"></span><span class="title-word">G</span><span class="title-word">U</span><span class="title-word">E</span><span class="title-word">S</span><span class="title-word">S</span>
+      </h1>
+      <p class="game-subtitle">Challenge your friends to guess the hidden word!</p>
+
+      <div class="home-buttons">
+        <button id="btnPlayOnline" class="btn btn-primary btn-large">
+          <span class="btn-icon">🌐</span> Play Online
+        </button>
+
+        <button id="btnPlayFriends" class="btn btn-secondary btn-large">
+          <span class="btn-icon">🎮</span> Multiplayer
+        </button>
+
+        <button id="btnProfile" class="btn btn-secondary">
+          <span class="btn-icon">👤</span> Profile
+        </button>
+
+        <button id="btnHowToPlay" class="btn btn-secondary">
+          <span class="btn-icon">📖</span> How to Play
+        </button>
+
+        <button id="btnExit" class="btn btn-danger">
+          <span class="btn-icon">🚪</span> Exit
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════ LOBBY SCREEN ═══════════ -->
+  <div id="lobbyScreen" class="screen">
+    <div class="lobby-container">
+      <h2 class="screen-title">Multiplayer</h2>
+
+      <div id="lobbyChoice" class="lobby-choice">
+        <button id="btnCreate" class="btn btn-primary btn-large">
+          <span class="btn-icon">✨</span> Create Game
+        </button>
+        <button id="btnJoin" class="btn btn-primary btn-large">
+          <span class="btn-icon">🔗</span> Join Game
+        </button>
+        <button id="btnLobbyBack" class="btn btn-ghost">← Back to Home</button>
+      </div>
+
+      <!-- Create Game Options -->
+      <div id="createOptions" class="lobby-section hidden">
+        <h3>Create a New Game</h3>
+        <div class="form-group">
+          <label>Word Length</label>
+          <div class="option-buttons" id="wordLengthOptions">
+            <button class="opt-btn active" data-value="5" data-type="wordLength">5 Letters</button>
+            <button class="opt-btn" data-value="6" data-type="wordLength">6 Letters</button>
+            <button class="opt-btn" data-value="7" data-type="wordLength">7 Letters</button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Difficulty</label>
+          <div class="option-buttons" id="difficultyOptions">
+            <button class="opt-btn active" data-value="easy" data-type="difficulty">🟢 Easy</button>
+            <button class="opt-btn" data-value="medium" data-type="difficulty">🟡 Medium</button>
+            <button class="opt-btn" data-value="hard" data-type="difficulty">🔴 Hard</button>
+          </div>
+        </div>
+        <button id="btnCreateGame" class="btn btn-primary">
+          <span class="btn-icon">🚀</span> Create Game
+        </button>
+        <button id="btnCreateBack" class="btn btn-ghost">← Back</button>
+      </div>
+
+      <!-- Join Game Options -->
+      <div id="joinOptions" class="lobby-section hidden">
+        <h3>Join a Game</h3>
+        <div class="form-group">
+          <label>Enter 6-Digit Room Code</label>
+          <input type="text" id="joinCodeInput" class="code-input" maxlength="6" placeholder="000000" autocomplete="off">
+        </div>
+        <button id="btnJoinGame" class="btn btn-primary">
+          <span class="btn-icon">🔗</span> Join Game
+        </button>
+        <button id="btnJoinBack" class="btn btn-ghost">← Back</button>
+      </div>
+
+      <!-- Waiting Room -->
+      <div id="waitingRoom" class="lobby-section hidden">
+        <h3>Waiting Room</h3>
+        <div class="room-code-display">
+          <span>Room Code:</span>
+          <span id="displayRoomCode" class="room-code">------</span>
+          <button id="btnCopyCode" class="btn-copy" title="Copy code">📋</button>
+        </div>
+        <div class="player-count-info">
+          <span id="playerCountText">1/4 Players</span>
+          <span class="min-players-note">(Min 2 players to start)</span>
+        </div>
+        <div id="playerList" class="player-list"></div>
+        <button id="btnStartGame" class="btn btn-primary btn-large hidden">
+          <span class="btn-icon">▶️</span> Start Game
+        </button>
+        <button id="btnLeaveRoom" class="btn btn-danger">Leave Room</button>
+      </div>
+
+      <!-- Online Lobby Screen (4 Slots) -->
+      <div id="onlineLobbyScreen" class="lobby-section hidden">
+        <h3 class="online-title">Online Matchmaking</h3>
+        <div class="online-slots-container">
+          <div class="online-slot" id="slot-0">
+            <div class="slot-loading"><span class="loading-char">?</span></div>
+          </div>
+          <div class="online-slot" id="slot-1">
+            <div class="slot-loading"><span class="loading-char">?</span></div>
+          </div>
+          <div class="online-slot" id="slot-2">
+            <div class="slot-loading"><span class="loading-char">?</span></div>
+          </div>
+          <div class="online-slot" id="slot-3">
+            <div class="slot-loading"><span class="loading-char">?</span></div>
+          </div>
+        </div>
+        <div class="online-status">
+          <p id="onlineStatusText">Looking for players...</p>
+          <div class="loading-dots"><span></span><span></span><span></span></div>
+        </div>
+        <button id="btnOnlineLobbyBack" class="btn btn-ghost">← Exit to Home</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════ GAME SCREEN ═══════════ -->
+  <div id="gameScreen" class="screen">
+    <div class="game-layout">
+      <!-- Sidebar -->
+      <div class="game-sidebar">
+        <div class="round-info">
+          <span class="round-label">Round</span>
+          <span id="roundNumber" class="round-number">1</span>
+        </div>
+        <div class="timer-container">
+          <div id="timerBar" class="timer-bar">
+            <div id="timerFill" class="timer-fill"></div>
+          </div>
+          <span id="timerText" class="timer-text">90s</span>
+        </div>
+        <div id="dupeHint" class="dupe-hint hidden"></div>
+        <div id="gamePlayers" class="game-players"></div>
+        <button id="btnExitMatch" class="btn btn-danger btn-small">
+          <span class="btn-icon">🚪</span> Exit Game
+        </button>
+      </div>
+
+      <!-- Main Game Area -->
+      <div class="game-main">
+        <div id="gameMessage" class="game-message hidden"></div>
+        <div id="guessGrid" class="guess-grid"></div>
+        <div class="input-area">
+          <div id="letterBoxes" class="letter-boxes"></div>
+          <div class="input-buttons">
+            <button id="btnSubmitGuess" class="btn btn-primary">
+              <span class="btn-icon">✓</span> Submit
+            </button>
+            <button id="btnClearGuess" class="btn btn-secondary">
+              <span class="btn-icon">✕</span> Clear
+            </button>
+          </div>
+          <div id="inputError" class="input-error hidden"></div>
+        </div>
+        <!-- Virtual Keyboard -->
+        <div id="virtualKeyboard" class="keyboard"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════ PROFILE MODAL ═══════════ -->
+  <div id="profileModal" class="modal hidden">
+    <div class="modal-content">
+      <button id="btnCloseProfile" class="modal-close">✕</button>
+      <h2>👤 Profile</h2>
+      <div class="form-group">
+        <label>Your Name</label>
+        <input type="text" id="playerNameInput" class="text-input" placeholder="Enter your name..." maxlength="20" autocomplete="off">
+      </div>
+      <div class="stats-display">
+        <h3>Your Stats</h3>
+        <div class="stat-grid">
+          <div class="stat-card">
+            <span class="stat-value" id="statWordsGuessed">0</span>
+            <span class="stat-label">Words Guessed</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-value" id="statGamesWon">0</span>
+            <span class="stat-label">Games Won</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-value" id="statGamesPlayed">0</span>
+            <span class="stat-label">Games Played</span>
+          </div>
+        </div>
+      </div>
+      <button id="btnSaveProfile" class="btn btn-primary">Save</button>
+    </div>
+  </div>
+
+  <!-- ═══════════ HOW TO PLAY MODAL ═══════════ -->
+  <div id="howToPlayModal" class="modal hidden">
+    <div class="modal-content modal-large">
+      <button id="btnCloseHowToPlay" class="modal-close">✕</button>
+      <h2>📖 How to Play</h2>
+      <div class="rules-content">
+        <div class="rule-section">
+          <h3>🎯 Objective</h3>
+          <p>Guess the hidden word before time runs out! Compete with 2-4 friends to see who can figure out the word first.</p>
+        </div>
+        <div class="rule-section">
+          <h3>🎮 Getting Started</h3>
+          <ul>
+            <li>Set your name in <strong>Profile</strong> before playing.</li>
+            <li>One player creates a game and gets a <strong>6-digit code</strong>.</li>
+            <li>Other players use this code to <strong>Join</strong> the game.</li>
+            <li>The creator chooses <strong>word length</strong> (5, 6, or 7 letters) and <strong>difficulty</strong> (Easy, Medium, Hard).</li>
+            <li>Minimum <strong>2 players</strong>, maximum <strong>4 players</strong>.</li>
+          </ul>
+        </div>
+        <div class="rule-section">
+          <h3>🔤 Guessing Rules</h3>
+          <ul>
+            <li>Type a <strong>meaningful English word</strong> with the correct number of letters.</li>
+            <li>Only <strong>alphabets</strong> are allowed — no numbers or symbols.</li>
+            <li>Random sequences of letters are <strong>not accepted</strong> — only real words!</li>
+            <li>You can guess <strong>continuously</strong> — no need to wait for other players.</li>
+          </ul>
+        </div>
+        <div class="rule-section">
+          <h3>🎨 Color Coding</h3>
+          <div class="color-guide">
+            <div class="color-example">
+              <span class="letter-box-demo green">A</span>
+              <p><strong>Green</strong> = Correct letter in the correct position</p>
+            </div>
+            <div class="color-example">
+              <span class="letter-box-demo yellow">B</span>
+              <p><strong>Yellow</strong> = Correct letter but in the wrong position</p>
+            </div>
+            <div class="color-example">
+              <span class="letter-box-demo red">C</span>
+              <p><strong>Red</strong> = Letter is not in the word at all</p>
+            </div>
+          </div>
+        </div>
+        <div class="rule-section">
+          <h3>⏱️ Rounds & Timing</h3>
+          <ul>
+            <li>Each round lasts <strong>90 seconds</strong>.</li>
+            <li>If someone guesses correctly, they win the round and a new round starts.</li>
+            <li>If nobody guesses in time, the word is revealed and a new round begins.</li>
+          </ul>
+        </div>
+        <div class="rule-section">
+          <h3>🔁 Duplicate Letters</h3>
+          <p>If the hidden word has a letter appearing more than once (e.g., "SYSTEM" has two "S"), all players will receive a hint like: <em>"two same alphabets 'S' are used in this word"</em>.</p>
+        </div>
+        <div class="rule-section">
+          <h3>🏆 Winning</h3>
+          <ul>
+            <li>The player who guesses correctly first gets a point and sees: <strong>"Congratulations you have won!"</strong></li>
+            <li>Your game history tracks how many words you've guessed correctly.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════ WIN OVERLAY ═══════════ -->
+  <div id="winOverlay" class="overlay hidden">
+    <div class="overlay-content">
+      <div class="confetti"></div>
+      <h2 id="winMessage">🎉 Congratulations!</h2>
+      <p id="winSubMessage">You guessed the word!</p>
+      <p class="next-round-text">Next round starting soon...</p>
+    </div>
+  </div>
+
+  <!-- ═══════════ EXIT SCREEN ═══════════ -->
+  <div id="exitScreen" class="screen">
+    <div class="home-container">
+      <h1 class="game-title">GOODBYE</h1>
+      <p class="game-subtitle">Thanks for playing WordGuess! We hope to see you again soon.</p>
+      <div class="home-buttons">
+        <button id="btnExitBackHome" class="btn btn-primary">
+          <span class="btn-icon">🏠</span> Back to Home
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
