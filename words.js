@@ -66,9 +66,13 @@ const targetWords = {
   }
 };
 
-// Start check-if-word integration
-const checkWord = require('check-if-word');
-const dictionary = checkWord('en');
+// Pre-calculate a Set of all valid words for instant, memory-efficient lookups
+const allValidWords = new Set();
+Object.values(targetWords).forEach(lengths => {
+  Object.values(lengths).forEach(wordList => {
+    wordList.forEach(word => allValidWords.add(word.toLowerCase()));
+  });
+});
 
 function getRandomWord(length, difficulty) {
   const words = targetWords[length]?.[difficulty];
@@ -77,8 +81,8 @@ function getRandomWord(length, difficulty) {
 }
 
 function isValidWord(word) {
-  // check-if-word takes care of checking if it's a valid English word
-  return dictionary.check(word.toLowerCase());
+  // Use the pre-calculated Set for O(1) lookup with zero extra memory overhead
+  return allValidWords.has(word.toLowerCase());
 }
 
 function getDuplicateLetterInfo(word) {

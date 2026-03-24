@@ -4,11 +4,13 @@ const { Server } = require('socket.io');
 const helmet = require('helmet');
 const cors = require('cors');
 const rateLimit = require('express-rate-limit');
-const createDOMPurify = require('dompurify');
-const { JSDOM } = require('jsdom');
-const window = new JSDOM('').window;
-const DOMPurify = createDOMPurify(window);
 const { getRandomWord, isValidWord, getDuplicateLetterInfo } = require('./words');
+
+// Lightweight sanitizer (replaces heavy jsdom+dompurify to save ~100MB RAM)
+function sanitize(str) {
+  if (typeof str !== 'string') return '';
+  return str.replace(/<[^>]*>/g, '').replace(/[^a-zA-Z0-9\s\-_]/g, '').trim().substring(0, 50);
+}
 
 const app = express();
 app.set('trust proxy', 1); // Trust first proxy for Serveo/Pinggy
@@ -28,12 +30,12 @@ app.use(helmet({
 }));
 app.use(cors());
 
-// Custom XSS Sanitizer Middleware using DOMPurify
+// Custom XSS Sanitizer Middleware (lightweight)
 const sanitizeBody = (req, res, next) => {
   if (req.body) {
     for (const key in req.body) {
       if (typeof req.body[key] === 'string') {
-        req.body[key] = DOMPurify.sanitize(req.body[key]);
+        req.body[key] = sanitize(req.body[key]);
       }
     }
   }
@@ -208,7 +210,7 @@ io.on('connection', (socket) => {
 
   socket.on('setName', (name) => {
     if (playerStats[socket.id]) {
-      const cleanName = DOMPurify.sanitize(name || 'Player');
+      const cleanName = sanitize(name || 'Player');
       playerStats[socket.id].name = cleanName;
     }
   });
