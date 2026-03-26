@@ -74,15 +74,57 @@ Object.values(targetWords).forEach(lengths => {
   });
 });
 
+const https = require('https');
+
+// Memory-efficient cache for API validation (Max 100 entries to prevent memory growth)
+const validationCache = new Map();
+const MAX_CACHE_SIZE = 100;
+
 function getRandomWord(length, difficulty) {
   const words = targetWords[length]?.[difficulty];
   if (!words || words.length === 0) return null;
   return words[Math.floor(Math.random() * words.length)];
 }
 
-function isValidWord(word) {
-  // Use the pre-calculated Set for O(1) lookup with zero extra memory overhead
-  return allValidWords.has(word.toLowerCase());
+async function isValidWord(word) {
+  const lowerWord = word.toLowerCase();
+  
+  // 1. Instant check against local high-quality "daily life" words
+  if (allValidWords.has(lowerWord)) return true;
+  
+  // 2. Check memory-efficient validation cache
+  if (validationCache.has(lowerWord)) return validationCache.get(lowerWord);
+  
+  // 3. API Fallback for words like "enters", "creates", "corners"
+  return new Promise((resolve) => {
+    // Set a timeout of 2 seconds to ensure game doesn't hang if API is slow
+    const request = https.get(`https://api.dictionaryapi.dev/api/v2/entries/en/${lowerWord}`, (res) => {
+      let data = '';
+      res.on('data', chunk => data += chunk);
+      res.on('end', () => {
+        const isValid = res.statusCode === 200;
+        
+        // Maintain cache size
+        if (validationCache.size >= MAX_CACHE_SIZE) {
+          const firstKey = validationCache.keys().next().value;
+          validationCache.delete(firstKey);
+        }
+        validationCache.set(lowerWord, isValid);
+        
+        resolve(isValid);
+      });
+    });
+
+    request.on('error', () => {
+      // Default to true if API is unreachable to not block user
+      resolve(true); 
+    });
+
+    request.setTimeout(2000, () => {
+      request.destroy();
+      resolve(true);
+    });
+  });
 }
 
 function getDuplicateLetterInfo(word) {

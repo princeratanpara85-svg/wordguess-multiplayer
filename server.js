@@ -366,7 +366,7 @@ io.on('connection', (socket) => {
     callback?.({ success: true });
   });
 
-  socket.on('submitGuess', (word, callback) => {
+  socket.on('submitGuess', async (word, callback) => {
     const code = socket.roomCode;
     const room = rooms[code];
     if (!room || !room.started || !room.currentWord) {
@@ -389,8 +389,8 @@ io.on('connection', (socket) => {
       return callback?.({ success: false, message: `Word must be ${room.wordLength} letters!` });
     }
 
-    // Validate: meaningful word
-    if (!isValidWord(guess)) {
+    // Validate: meaningful word (Asynchronous API check)
+    if (!(await isValidWord(guess))) {
       return callback?.({ success: false, message: 'Write meaningful words!' });
     }
 
