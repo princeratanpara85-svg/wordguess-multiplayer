@@ -112,7 +112,12 @@ function startNewRound(roomCode) {
   if (!room) return;
 
   room.round++;
-  room.currentWord = getRandomWord(room.wordLength, room.difficulty);
+  room.currentWord = getRandomWord(room.wordLength, room.difficulty, room.usedWords || []);
+  if (!room.usedWords) room.usedWords = [];
+  room.usedWords.push(room.currentWord.toLowerCase());
+  // Keep history of last 100 words (safely under the 340-word pool per category)
+  if (room.usedWords.length > 100) room.usedWords.shift();
+
   room.roundStartTime = Date.now();
   room.roundWinner = null;
 
@@ -242,7 +247,8 @@ io.on('connection', (socket) => {
       timer: null,
       started: false,
       maxPlayers: 4,
-      mode: mode === 'public' ? 'public' : 'private'
+      mode: mode === 'public' ? 'public' : 'private',
+      usedWords: [] // Track word history for this room
     };
     socket.join(code);
     socket.roomCode = code;
@@ -345,7 +351,8 @@ io.on('connection', (socket) => {
         timer: null,
         started: false,
         maxPlayers: 4,
-        mode: 'public'
+        mode: 'public',
+        usedWords: [] // Track word history for this room
       };
       socket.join(code);
       socket.roomCode = code;
